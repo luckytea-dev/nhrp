@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NO HOPE RP | Terminal de Survie</title>
+    <style>
+        :root {
+            --primary: #ff4500;
+            --dark-red: #662211;
+            --bg-side: #0d0d0d;
+            --bg-main: #0a0a0a;
+            --text: #b0b0b0;
+            --online: #00ff44;
+            --offline: #ff3333;
+        }
+
+        body {
+            font-family: 'Courier New', Courier, monospace;
+            background-color: var(--bg-main);
+            color: var(--text);
+            margin: 0;
+            display: flex;
+            min-height: 100vh;
+            scroll-behavior: smooth;
+        }
+
+        /* SIDEBAR GAUCHE */
+        aside {
+            width: 280px;
+            background-color: var(--bg-side);
+            border-right: 2px solid var(--dark-red);
+            position: fixed;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            z-index: 1000;
+        }
+
+        .sidebar-header { padding: 30px 20px; text-align: center; }
+        .sidebar-logo { width: 140px; filter: drop-shadow(0 0 10px var(--primary)); }
+
+        nav { flex: 1; overflow-y: auto; }
+        .nav-item {
+            display: block;
+            padding: 15px 25px;
+            color: #fff;
+            text-decoration: none;
+            font-weight: bold;
+            text-transform: uppercase;
+            cursor: pointer;
+            border-left: 4px solid transparent;
+            transition: 0.3s;
+        }
+        .nav-item:hover { background: rgba(255, 69, 0, 0.1); color: var(--primary); }
+
+        .submenu { display: none; background: #050505; flex-direction: column; }
+        .submenu a { padding: 10px 45px; color: #888; text-decoration: none; font-size: 0.85rem; cursor: pointer; }
+        .submenu a:hover { color: var(--primary); background: rgba(255, 255, 255, 0.05); }
+
+        /* STATUS DU SERVEUR */
+        .server-status-box {
+            padding: 15px;
+            margin: 0 20px 10px 20px;
+            background: #151515;
+            border: 1px solid #222;
+            border-radius: 4px;
+            text-align: center;
+            font-size: 0.75rem;
+        }
+        .status-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 5px;
+            background: #555;
+        }
+        .dot-online { background: var(--online); box-shadow: 0 0 8px var(--online); }
+        .dot-offline { background: var(--offline); box-shadow: 0 0 8px var(--offline); }
+        
+        #player-count { margin-top: 5px; color: #fff; font-weight: bold; }
+
+        .sidebar-footer { padding: 20px; display: flex; flex-direction: column; gap: 10px; }
+        .btn { text-align: center; padding: 12px; text-decoration: none; font-weight: bold; font-size: 0.75rem; border-radius: 2px; text-transform: uppercase; }
+        .btn-discord { background: #5865F2; color: white; }
+        .btn-play { background: var(--dark-red); color: white; border: 1px solid var(--primary); }
+
+        /* CONTENU PRINCIPAL */
+        main { margin-left: 280px; flex: 1; width: calc(100% - 280px); }
+
+        .banner {
+            width: 100%;
+            height: 400px;
+            background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.8)), 
+                        url('https://images.unsplash.com/photo-1478760329108-5c3ed9d495a0?q=80&w=2000');
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            border-bottom: 3px solid var(--dark-red);
+            text-align: center;
+        }
+
+        .banner h1 { font-size: 4rem; color: #fff; margin: 0; text-shadow: 0 0 20px #000; letter-spacing: 5px; }
+        .banner p { color: var(--primary); font-size: 1.2rem; font-style: italic; }
+
+        .container { max-width: 900px; margin: 40px auto; padding: 0 40px; }
+        .section-content { display: none; animation: fadeIn 0.5s ease; }
+        .section-content.active { display: block; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .rule-card { background: #151515; border: 1px solid #222; padding: 30px; margin-bottom: 40px; border-left: 4px solid var(--dark-red); }
+        h2 { color: var(--primary); text-transform: uppercase; border-bottom: 1px solid #333; padding-bottom: 10px; }
+        h3 { color: #fff; text-transform: uppercase; font-size: 1.1rem; margin-top: 30px; }
+
+        .staff-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-top: 20px; }
+        .staff-card { background: #0a0a0a; border: 1px solid #333; padding: 20px; text-align: center; }
+        .staff-card strong { color: #fff; display: block; margin-top: 5px; }
+        
+        /* CLASSES DE COULEURS STAFF */
+        .rank-gm { color: #ff0000; font-size: 0.7rem; font-weight: bold; letter-spacing: 2px; text-shadow: 0 0 8px rgba(255, 0, 0, 0.4); }
+        .rank-admin { color: #adc007; font-size: 0.7rem; font-weight: bold; letter-spacing: 2px; }
+        .rank-mod { color: #22adee; font-size: 0.7rem; font-weight: bold; letter-spacing: 2px; }
+
+        footer { text-align: center; padding: 40px; font-size: 0.7rem; opacity: 0.4; }
+    </style>
+</head>
+<body>
+
+    <aside>
+        <div class="sidebar-header">
+            <img src="https://cdn.discordapp.com/attachments/1453859316582060102/1453860036370759816/Nouveau_projet_1.png" alt="Logo" class="sidebar-logo">
+        </div>
+
+        <nav>
+            <a onclick="showPage('accueil')" class="nav-item">🏠 Accueil</a>
+            <a onclick="showPage('lore')" class="nav-item">📖 Histoire (Lore)</a>
+            <a onclick="toggleReglement()" class="nav-item">📜 Règlement ▾</a>
+            <div id="reglement-menu" class="submenu">
+                <a onclick="showPage('reglement', 'base')">Règles de base</a>
+                <a onclick="showPage('reglement', 'survie')">Survie</a>
+                <a onclick="showPage('reglement', 'menace')">Menace</a>
+                <a onclick="showPage('reglement', 'zone')">Zones</a>
+                <a onclick="showPage('reglement', 'construction')">Construction</a>
+                <a onclick="showPage('reglement', 'mort')">Mort RP</a>
+            </div>
+            <a onclick="showPage('staff-page')" class="nav-item">🛡️ Équipe Staff</a>
+        </nav>
+
+        <div class="server-status-box">
+            <div><span id="status-dot" class="status-dot"></span> <span id="status-text">VÉRIFICATION...</span></div>
+            <div id="player-count">-- / --</div>
+        </div>
+
+        <div class="sidebar-footer">
+            <a href="https://discord.gg/BPWmtWppAR" target="_blank" class="btn btn-discord">Discord</a>
+            <a href="fivem://connect/yl9kp5" class="btn btn-play">Se Connecter</a>
+        </div>
+    </aside>
+
+    <main>
+        <div class="banner">
+            <h1>NO HOPE RP</h1>
+            <p>L'humanité s'arrête ici. La survie commence.</p>
+        </div>
+
+        <div class="container">
+            
+            <div id="accueil" class="section-content active">
+                <h2>Bienvenue, survivant</h2>
+                <div class="rule-card">
+                    <p>Vous avez trouvé le terminal de <strong>NO HOPE RP</strong>. Ce site contient toutes les informations vitales pour votre existence dans la ville dévastée de Los Santos.</p>
+                    <p>Utilisez le menu à gauche pour consulter notre histoire ou apprendre les règles strictes de notre communauté.</p>
+                </div>
+            </div>
+
+            <div id="lore" class="section-content">
+                <h2>📖 L'HISTOIRE DU CHAOS</h2>
+                <div class="rule-card">
+                    <p>En 2026, l'Effondrement a tout balayé. Ce n'était pas rapide, ce n'était pas propre. C'était le silence radio, puis le bruit des pillages.</p>
+                    <p>Los Santos est désormais un cimetière de béton où la végétation et les infectés reprennent leurs droits.</p>
+                </div>
+            </div>
+
+            <div id="reglement" class="section-content">
+                <h2>📜 PROTOCOLES DE SÉCURITÉ</h2>
+                <div id="base" class="rule-card">
+                    <h3>Règles de base</h3>
+                    <p>Le Fairplay avant tout. Le Meta-gaming (utiliser des infos hors-jeu) et le Power-gaming (actions impossibles) sont strictement interdits.</p>
+                </div>
+                <div id="survie" class="rule-card">
+                    <h3>Survie</h3>
+                    <p>Incarnez la fatigue, la faim et les besoins vitaux de votre personnage. Ne courez pas indéfiniment sans raison RP.</p>
+                </div>
+                <div id="menace" class="rule-card">
+                    <h3>Menace</h3>
+                    <p>La vie est précieuse. Jouez le Fear RP (la peur) de manière réaliste face à une arme ou une supériorité numérique.</p>
+                </div>
+                <div id="zone" class="rule-card">
+                    <h3>Zones</h3>
+                    <p>Respectez la dangerosité des zones. Certaines zones rouges sont à tir à vue (KOS) encadré, soyez vigilants.</p>
+                </div>
+                <div id="construction" class="rule-card">
+                    <h3>Construction</h3>
+                    <p>Construisez des abris réalistes. Les structures flottantes ou abusives seront supprimées sans préavis.</p>
+                </div>
+                <div id="mort" class="rule-card">
+                    <h3>Mort RP</h3>
+                    <p>Chaque coma a des conséquences. Une mort définitive nécessite une scène majeure validée par le Staff ou le joueur.</p>
+                </div>
+            </div>
+
+            <div id="staff-page" class="section-content">
+                <h2>🛡️ UNITÉ DE CONTRÔLE (STAFF)</h2>
+                <div class="rule-card">
+                    <p>Hiérarchie opérationnelle du secteur Los Santos.</p>
+                    <h3>Direction</h3>
+                    <div class="staff-grid">
+                        <div class="staff-card"><span class="rank-gm">GAMEMASTER</span><strong>Sereni-tea</strong></div>
+                        <div class="staff-card"><span class="rank-gm">GAMEMASTER</span><strong>Tarzan06300</strong></div>
+                        <div class="staff-card"><span class="rank-gm">GAMEMASTER</span><strong>Le_bobi</strong></div>
+                    </div>
+                    <h3>Modération</h3>
+                    <div class="staff-grid">
+                        <div class="staff-card"><span class="rank-admin">ADMIN</span><strong>Maxime</strong></div>
+                        <div class="staff-card"><span class="rank-mod">MODÉRATEUR</span><strong>Chose</strong></div>
+                        <div class="staff-card"><span class="rank-mod">MODÉRATEUR</span><strong>1557</strong></div>
+                        <div class="staff-card"><span class="rank-mod">MODÉRATEUR</span><strong>Snayze</strong></div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <footer>&copy; 2026 NO HOPE RP - TERMINAL SURVIE V1.2</footer>
+    </main>
+
+    <script>
+        // --- LOGIQUE NAVIGATION ---
+        function toggleReglement() {
+            const menu = document.getElementById('reglement-menu');
+            menu.style.display = (menu.style.display === 'flex') ? 'none' : 'flex';
+        }
+
+        function showPage(pageId, anchorId = null) {
+            document.querySelectorAll('.section-content').forEach(s => s.classList.remove('active'));
+            const target = document.getElementById(pageId);
+            if(target) target.classList.add('active');
+
+            if (anchorId) {
+                setTimeout(() => {
+                    const el = document.getElementById(anchorId);
+                    if(el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 50);
+            } else {
+                window.scrollTo({ top: 350, behavior: 'smooth' });
+            }
+        }
+
+        // --- LOGIQUE ÉTAT SERVEUR ---
+        const CFX_ID = "yl9kp5";
+
+        async function updateStatus() {
+            const dotEl = document.getElementById('status-dot');
+            const textEl = document.getElementById('status-text');
+            const playersEl = document.getElementById('player-count');
+
+            try {
+                const response = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent('https://servers-frontend.fivem.net/api/servers/single/' + CFX_ID)}`);
+                const rawData = await response.json();
+                const data = JSON.parse(rawData.contents);
+
+                if (data && data.Data) {
+                    const info = data.Data;
+                    dotEl.className = "status-dot dot-online";
+                    textEl.innerText = "SERVEUR EN LIGNE";
+                    textEl.style.color = "var(--online)";
+                    playersEl.innerText = `Survivants : ${info.clients} / ${info.sv_maxclients}`;
+                } else {
+                    throw new Error();
+                }
+            } catch (error) {
+                dotEl.className = "status-dot dot-offline";
+                textEl.innerText = "SERVEUR HORS LIGNE";
+                textEl.style.color = "var(--offline)";
+                playersEl.innerText = "Liaison perdue...";
+            }
+        }
+
+        updateStatus();
+        setInterval(updateStatus, 60000);
+    </script>
+
+</body>
+</html>
