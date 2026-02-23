@@ -115,25 +115,79 @@
 
         .rule-card { background: #151515; border: 1px solid #222; padding: 30px; margin-bottom: 40px; border-left: 4px solid var(--dark-red); }
         h2 { color: var(--primary); text-transform: uppercase; border-bottom: 1px solid #333; padding-bottom: 10px; }
-        h3 { color: #fff; text-transform: uppercase; font-size: 1.1rem; margin-top: 30px; }
+        h3 { color: #fff; text-transform: uppercase; font-size: 1.1rem; margin-top: 30px; border-bottom: 1px solid rgba(255,69,0,0.3); padding-bottom: 5px;}
 
         .staff-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-top: 20px; }
         .staff-card { background: #0a0a0a; border: 1px solid #333; padding: 20px; text-align: center; }
         .staff-card strong { color: #fff; display: block; margin-top: 5px; }
         
-        /* CLASSES DE COULEURS STAFF */
         .rank-gm { color: #ff0000; font-size: 0.7rem; font-weight: bold; letter-spacing: 2px; text-shadow: 0 0 8px rgba(255, 0, 0, 0.4); }
         .rank-admin { color: #adc007; font-size: 0.7rem; font-weight: bold; letter-spacing: 2px; }
         .rank-mod { color: #22adee; font-size: 0.7rem; font-weight: bold; letter-spacing: 2px; }
 
+        /* STYLE ARCHIVES WEEZEL */
+        .news-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .news-item {
+            background: #111;
+            padding: 10px;
+            border: 1px solid #222;
+            text-align: center;
+            transition: 0.3s;
+            cursor: pointer;
+        }
+        .news-item:hover { border-color: var(--primary); transform: translateY(-5px); }
+        .news-item img { width: 100%; height: auto; border-bottom: 1px solid #222; margin-bottom: 8px; }
+        .news-item span { font-size: 0.7rem; color: var(--primary); font-weight: bold; }
+
+        /* LIGHTBOX SYSTEM */
+        #lightbox {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            justify-content: center;
+            align-items: center;
+        }
+        #lightbox.active { display: flex; }
+        #lightbox img {
+            max-width: 90%;
+            max-height: 80%;
+            border: 2px solid var(--primary);
+            box-shadow: 0 0 30px rgba(255, 69, 0, 0.3);
+        }
+        .close-lightbox {
+            position: absolute;
+            top: 30px;
+            right: 30px;
+            color: white;
+            font-size: 2rem;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
         footer { text-align: center; padding: 40px; font-size: 0.7rem; opacity: 0.4; }
+        .reglement-intro { font-style: italic; color: #eee; border-left: 2px solid var(--primary); padding-left: 15px; margin-bottom: 30px; }
     </style>
 </head>
 <body>
 
+    <div id="lightbox" onclick="closeImage()">
+        <span class="close-lightbox">&times;</span>
+        <img id="lightbox-img" src="" alt="Zoom">
+    </div>
+
     <aside>
         <div class="sidebar-header">
-            <img src="https://cdn.discordapp.com/attachments/1453859316582060102/1453860036370759816/Nouveau_projet_1.png?ex=6960c86c&is=695f76ec&hm=f5dcf00bd57514bd76761c1580a1b0d0f13ca711da7da8643ead0427e0a2c92a&" alt="Logo" class="sidebar-logo">
+            <img src="https://media.discordapp.net/attachments/1453859316582060102/1453860036370759816/Nouveau_projet_1.png?ex=699cc4ac&is=699b732c&hm=9826823dc42a899594a024634809c7bfc16bd4b74c9ef7584663bf6859518a5c&=&format=webp&quality=lossless" alt="Logo" class="sidebar-logo">
         </div>
 
         <nav>
@@ -141,12 +195,16 @@
             <a onclick="showPage('lore')" class="nav-item">📖 Histoire (Lore)</a>
             <a onclick="toggleReglement()" class="nav-item">📜 Règlement ▾</a>
             <div id="reglement-menu" class="submenu">
-                <a onclick="showPage('reglement', 'base')">Règles de base</a>
-                <a onclick="showPage('reglement', 'survie')">Survie</a>
-                <a onclick="showPage('reglement', 'menace')">Menace</a>
-                <a onclick="showPage('reglement', 'zone')">Zones</a>
-                <a onclick="showPage('reglement', 'construction')">Construction</a>
-                <a onclick="showPage('reglement', 'mort')">Mort RP</a>
+                <a onclick="showPage('reglement', 'section-1')">1. Comportement</a>
+                <a onclick="showPage('reglement', 'section-2')">2. Règles RP</a>
+                <a onclick="showPage('reglement', 'section-3')">3. Factions & Groupes</a>
+                <a onclick="showPage('reglement', 'section-4')">4. Trahison</a>
+                <a onclick="showPage('reglement', 'section-5')">5. Bases</a>
+                <a onclick="showPage('reglement', 'section-6')">6. Zones Spéciales</a>
+                <a onclick="showPage('reglement', 'section-7')">7. Braquages</a>
+                <a onclick="showPage('reglement', 'section-8')">8. Staff</a>
+                <a onclick="showPage('reglement', 'section-9')">9. Raid de base</a>
+                <a onclick="showPage('reglement', 'section-10')">10. Boutique</a>
             </div>
             <a onclick="showPage('staff-page')" class="nav-item">🛡️ Équipe Staff</a>
         </nav>
@@ -184,33 +242,100 @@
                     <p>En 2026, l'Effondrement a tout balayé. Ce n'était pas rapide, ce n'était pas propre. C'était le silence radio, puis le bruit des pillages.</p>
                     <p>Los Santos est désormais un cimetière de béton où la végétation et les infectés reprennent leurs droits.</p>
                 </div>
+
+                <h3>📰 ARCHIVES WEEZEL NEWS</h3>
+                <div class="news-grid">
+                    <div class="news-item" onclick="openImage('1.png')"><img src="1.png" alt="Archive 1"><span>ARTICLE #01</span></div>
+                    <div class="news-item" onclick="openImage('2.png')"><img src="2.png" alt="Archive 2"><span>ARTICLE #02</span></div>
+                    <div class="news-item" onclick="openImage('3.png')"><img src="3.png" alt="Archive 3"><span>ARTICLE #03</span></div>
+                    <div class="news-item" onclick="openImage('4.png')"><img src="4.png" alt="Archive 4"><span>ARTICLE #04</span></div>
+                    <div class="news-item" onclick="openImage('5.png')"><img src="5.png" alt="Archive 5"><span>ARTICLE #05</span></div>
+                    <div class="news-item" onclick="openImage('6.png')"><img src="6.png" alt="Archive 6"><span>ARTICLE #06</span></div>
+                    <div class="news-item" onclick="openImage('7.png')"><img src="7.png" alt="Archive 7"><span>ARTICLE #07</span></div>
+                </div>
             </div>
 
             <div id="reglement" class="section-content">
-                <h2>📜 PROTOCOLES DE SÉCURITÉ</h2>
-                <div id="base" class="rule-card">
-                    <h3>Règles de base</h3>
-                    <p>Le Fairplay avant tout. Le Meta-gaming (utiliser des infos hors-jeu) et le Power-gaming (actions impossibles) sont strictement interdits.</p>
+                <h2>📜 RÈGLEMENT NO HOPE | RP</h2>
+                
+                <div class="rule-card">
+                    <h3>PRÉAMBULE</h3>
+                    <p class="reglement-intro">Bienvenue sur No Hope | RP, un serveur FiveM post-apocalyptique. Chaque ressource, chaque interaction, chaque scène RP peut avoir des conséquences majeures. Ce règlement existe pour garantir une expérience juste, immersive et équilibrée. Il est essentiel que chaque joueur en prenne connaissance. L’ignorance des règles n’est pas une excuse. Toute infraction peut entraîner des sanctions allant d’un simple avertissement à un bannissement définitif.</p>
                 </div>
-                <div id="survie" class="rule-card">
-                    <h3>Survie</h3>
-                    <p>Incarnez la fatigue, la faim et les besoins vitaux de votre personnage. Ne courez pas indéfiniment sans raison RP.</p>
+
+                <div id="section-1" class="rule-card">
+                    <h3>1. COMPORTEMENT GÉNÉRAL</h3>
+                    <p><strong>1.1</strong> Le respect est une règle absolue. Aucun propos haineux, injurieux ou moqueur ne sera toléré, que ce soit en jeu ou sur Discord. Le racisme, la xénophobie, la misogynie, l’homophobie ou tout autre comportement discriminatoire entraînera une sanction immédiate. Le harcèlement, sous toutes ses formes, est interdit.</p>
+                    <p><strong>1.2</strong> Il est essentiel de faire la distinction entre ce qui est joué en RP (dans le jeu, entre personnages) et ce qui est HRP (réel, entre joueurs). Vous ne devez jamais prendre personnellement un acte RP, ni réagir de façon agressive IRL. Les insultes, moqueries ou agressions verbales hors RP seront sanctionnées, même si elles suivent une scène tendue en jeu.</p>
+                    <p><strong>1.3</strong> En cas de désaccord ou de souci durant une scène, vous devez toujours terminer la scène RP avant de faire une réclamation. Une fois la scène finie, ouvrez un ticket sur le Discord du serveur en expliquant la situation et en fournissant des preuves (vidéos, captures d’écran). Le staff analysera la scène de manière neutre.</p>
+                    <p><strong>1.4</strong> Le comportement général attendu est celui d’un joueur mature, bienveillant et impliqué. Encouragez les nouveaux, aidez les autres à progresser en RP, proposez des scènes immersives. Ne jouez pas contre les autres, mais avec eux. Même les conflits RP doivent rester respectueux dans leur gestion HRP.</p>
                 </div>
-                <div id="menace" class="rule-card">
-                    <h3>Menace</h3>
-                    <p>La vie est précieuse. Jouez le Fear RP (la peur) de manière réaliste face à une arme ou une supériorité numérique.</p>
+
+                <div id="section-2" class="rule-card">
+                    <h3>2. RÈGLES DE ROLEPLAY</h3>
+                    <p><strong>2.1</strong> Le respect du jeu de rôle est essentiel. Chaque joueur incarne un personnage. Celui-ci a ses émotions, sa logique, ses limites. Le joueur doit toujours faire la distinction entre ses actions personnelles (HRP) et celles de son personnage (RP). </p>
+                    <p><strong>2.2 Metagaming :</strong> Il est formellement interdit d'utiliser des informations obtenues hors RP (dans un stream, un Discord vocal, une discussion hors-jeu) pour influencer les décisions de votre personnage. Par exemple, si vous regardez un live d’un autre joueur et que vous vous rendez à son emplacement grâce à cela, c’est une infraction grave. </p>
+                    <p><strong>2.3 Powergaming :</strong> Vous ne devez jamais forcer une action sur un autre joueur sans lui laisser la possibilité de réagir. Vous ne pouvez pas jouer un personnage invincible ou profiter des failles du jeu (ex : sortir de véhicule en marche, résister à 3 balles dans la tête sans réaction RP, etc.). </p>
+                    <p><strong>2.4 Fear RP :</strong> Dans un univers hostile, votre personnage doit craindre pour sa vie. Une arme pointée sur lui = il doit se rendre. Tenter de riposter seul face à 3 ennemis armés est incohérent et sanctionnable. </p>
+                    <p><strong>2.5 No Pain RP :</strong> Les blessures doivent être prises en compte. Une balle dans la jambe doit vous ralentir, voire vous immobiliser. Vous ne pouvez ni sprinter ni continuer le combat comme si de rien n'était. </p>
+                    <p><strong>2.6 Combat Logging :</strong> Se déconnecter pour fuir une scène ou éviter des conséquences (capture, mort RP, vol, etc.) est strictement interdit. Ce comportement est passible de sanctions sévères, pouvant aller jusqu’au ban permanent. </p>
+                    <p><strong>2.7 Revenge Kill :</strong> Vous ne pouvez pas revenir sur une scène ou tenter de vous venger si votre personnage est mort RP. Sa vie est terminée, son histoire s’arrête là. </p>
+                    <p><strong>2.8 Mort RP :</strong> Elle doit être justifiée, réaliste et demandée en ticket. Votre personnage doit avoir été actif au moins 3 semaines. Elle doit être validée par le staff. Les pseudos du type “MortRP” sont interdits. Une fois morte RP, l’histoire du personnage est clôturée. </p>
+                    <p><strong>2.9 RP sexuel :</strong> Il est autorisé à condition qu’il soit modéré, entre deux personnes majeures consentantes, dans un lieu privé, et jamais visible ni imposé à un tiers. Toute scène à caractère sexuel non conforme ou publique sera sévèrement punie. </p>
                 </div>
-                <div id="zone" class="rule-card">
-                    <h3>Zones</h3>
-                    <p>Respectez la dangerosité des zones. Certaines zones rouges sont à tir à vue (KOS) encadré, soyez vigilants.</p>
+
+                <div id="section-3" class="rule-card">
+                    <h3>3. FACTIONS ET GROUPES</h3>
+                    <p><strong>3.1</strong> Le serveur distingue deux types de structures organisées : les groupes (officiels) et les factions (non officielles). Ces structures permettent aux joueurs de créer une dynamique collective, mais elles impliquent aussi des responsabilités, des règles précises et un suivi par le staff. </p>
+                    <p><strong>3.2 Factions :</strong> Il s’agit de structures non officielles. Une faction peut regrouper jusqu’à 9 membres maximum. Elle peut posséder une base (avec spawn zombie obligatoire) et un maximum de 10 véhicules. Les factions n’ont pas accès aux bonus RP (loot spécifique ou atouts). Elles ne peuvent pas pratiquer la mort RP en interne. Elles ont le droit d’avoir un serveur Discord privé, validé par le staff. </p>
+                    <p><strong>3.3 Groupes :</strong> Ce sont les structures officielles. Pour en créer un, il faut un minimum de 9 membres actifs et déposer un dossier validé par le staff. Un groupe peut accueillir jusqu’à 25 membres, posséder deux bases (sans spawn zombie), un maximum de 15 véhicules, et obtenir jusqu’à deux atouts RP spécifiques. Les groupes peuvent effectuer des morts RP internes, avec ticket staff et justification RP solide. </p>
+                    <p><strong>3.4 Alliance :</strong> Une structure peut avoir une seule alliance active. Seules les alliances entre Groupe + Faction ou Faction + Faction sont autorisées. Les alliances entre deux Groupes sont interdites pour des raisons d’équilibre RP. Le non-respect de cette règle peut entraîner une sanction collective sauf sous autorisation du staff. </p>
+                    <p><strong>3.5 Sanctions :</strong> Chaque structure peut recevoir des avertissements si elle ne respecte pas le règlement (abus RP, conflits HRP, powergaming collectif, etc.). Au bout de trois avertissements, la structure est dissoute et tous les membres sont wipe (reset total personnage, inventaire, base et véhicule).</p>
                 </div>
-                <div id="construction" class="rule-card">
-                    <h3>Construction</h3>
-                    <p>Construisez des abris réalistes. Les structures flottantes ou abusives seront supprimées sans préavis.</p>
+
+                <div id="section-4" class="rule-card">
+                    <h3>4. TRAHISON ET DÉPART</h3>
+                    <p><strong>4.1</strong> Lorsqu’un joueur trahit sa structure (en livrant des informations à l’ennemi, en volant des ressources, ou en la mettant en danger) ou lorsqu’il décide de partir sans accord RP, le leader de la structure a un droit de décision RP total sur ce personnage. Il peut, dans le cadre RP, décider de l’épargner ou de le faire mourir RP. </p>
+                    <p><strong>4.2</strong> Si la mort RP est choisie, il faut ouvrir un ticket staff pour notification (pas besoin de dossier complet). En revanche, si le joueur est libéré, il ne peut pas intégrer cette structure avant un minimum de 30 jours RP.</p>
                 </div>
-                <div id="mort" class="rule-card">
-                    <h3>Mort RP</h3>
-                    <p>Chaque coma a des conséquences. Une mort définitive nécessite une scène majeure validée par le Staff ou le joueur.</p>
+
+                <div id="section-5" class="rule-card">
+                    <h3>5. BASES ET CONSTRUCTIONS</h3>
+                    <p><strong>5.1</strong> Les constructions doivent toujours être cohérentes avec l’univers post-apocalyptique. Les bases flottantes, impossibles IRL, totalement enterrées ou bloquant l’accès à une zone de loot sont strictement interdites. Le staff se réserve le droit de supprimer une base non conforme sans avertissement préalable. </p>
+                    <p><strong>5.2</strong> Toute modification interne (mapping dans un bâtiment) doit faire l’objet d’une demande via ticket. En cas d’inactivité d’une structure de plus de 10 jours, la base peut être supprimée, sauf si une absence a été notifiée.</p>
+                </div>
+
+                <div id="section-6" class="rule-card">
+                    <h3>6. ZONES SPÉCIALES</h3>
+                    <p><strong>6.1</strong> La zone safe sont indiquées par un point sur la carte. Elles sont protégées par la U.S.D (unité spécial de défense). Dans ces zones, il est formellement interdit de construire, stocker ou engager le combat. Elles sont considérées comme des zones pacifiques et sécurisées pour tous les joueurs. </p>
+                    <p><strong>6.2</strong> Les largages sont des zones de conflit temporaire : les combats y sont autorisés sans sommation. Une fois le colis sécurisé, les hostilités doivent cesser immédiatement. Le non-respect de cette règle entraînera des sanctions RP et HRP.</p>
+                </div>
+
+                <div id="section-7" class="rule-card">
+                    <h3>7. BRAQUAGES ET OTAGES</h3>
+                    <p><strong>7.1</strong> Chaque joueur ou mini-groupe peut effectuer un braquage toutes les 24h. Ce délai s’applique également aux scènes de prise d’otage ou de vol organisé. Les braquages doivent être logiques, crédibles, préparés, et respecter les limites suivantes : </p>
+                    <p><strong>7.2 En ville :</strong> vous pouvez voler jusqu’à 25 % du contenu RP de la victime (ressources, armes de poing, objets). Si la victime possède deux armes, vous ne pouvez lui prendre que l’arme de poing. Vous devez attendre au moins 3h avant de rebraquer cette même cible ou un groupe lié à elle. </p>
+                    <p><strong>7.3 Hors ville :</strong> si la victime coopère, vous pouvez prendre jusqu’à 25 %. Si elle résiste ou refuse de jouer le RP, vous pouvez récupérer l’intégralité du butin. Un refus RP entraîne des sanctions supplémentaires si signalé. </p>
+                    <p><strong>7.4 Otages :</strong> les otages ne sont pas des objets RP. Ils doivent être utilisés de façon réaliste, avec une communication RP réelle avec leur groupe. Une scène de torture, négociation ou exécution doit rester cohérente. Une mort RP est possible en otage si le contexte le justifie.</p>
+                </div>
+
+                <div id="section-8" class="rule-card">
+                    <h3>8. STAFF</h3>
+                    <p><strong>8.1</strong> Les membres du staff sont là pour encadrer, sécuriser, modérer et accompagner les scènes RP. Un staff ne peut pas intervenir dans une scène où il est impliqué. Il doit se retirer et laisser un autre membre intervenir. Toute action modérative doit être loguée ou notifiée dans le canal staff prévu à cet effet. </p>
+                    <p><strong>8.2</strong> Le staff a un devoir de neutralité, de professionnalisme et de respect. Les abus de pouvoir seront punis, jusqu’à retrait de rôle ou ban selon la gravité.</p>
+                </div>
+
+                <div id="section-9" class="rule-card">
+                    <h3>9. RAID DE BASE</h3>
+                    <p><strong>9.1</strong> Un raid est une attaque coordonnée contre une base ennemie. Pour lancer un raid, vous devez soumettre un dossier RP via ticket. Ce dossier doit expliquer le but du raid, le contexte RP, les cibles, et les conséquences prévues. </p>
+                    <p><strong>9.2</strong> Si vous remportez le raid (victoire totale, plus de défenseurs actifs), vous pouvez prendre jusqu’à 50 % du stock de la base. Vous ne pouvez pas voler de véhicules achetés en boutique, mais les véhicules neutres sans logo sont autorisés. Si les défenseurs coopèrent, une négociation RP est possible. Sinon, une mort RP collective peut être jouée. La base peut être reconquise par la suite via une scène RP approuvée par le staff.</p>
+                </div>
+
+                <div id="section-10" class="rule-card">
+                    <h3>10. BOUTIQUE ET SOUTIEN</h3>
+                    <p><strong>10.1</strong> La boutique permet aux joueurs de soutenir financièrement le projet. Chaque achat est considéré comme un don. Aucun remboursement ne sera effectué, quelle que soit la situation. Les capsules ou crédits non dépensés peuvent être compensés après un wipe, si vous fournissez une preuve d’achat + une capture de votre inventaire avec date visible. </p>
+                    <p><strong>10.2</strong> Aucun bien boutique ne peut être échangé ou transféré entre joueurs. Merci à ceux qui aident au développement et à la pérennité du serveur via leurs dons ou achats. </p>
+                    <p style="text-align: right; margin-top: 20px; font-weight: bold;">Propriétaire de No Hope | RP : @luckytea_</p>
                 </div>
             </div>
 
@@ -226,9 +351,9 @@
                     </div>
                     <h3>Modération</h3>
                     <div class="staff-grid">
+                        <div class="staff-card"><span class="rank-admin">ADMIN</span><strong>1557</strong></div>
                         <div class="staff-card"><span class="rank-admin">ADMIN</span><strong>Maxime</strong></div>
                         <div class="staff-card"><span class="rank-mod">MODÉRATEUR</span><strong>Chose</strong></div>
-                        <div class="staff-card"><span class="rank-mod">MODÉRATEUR</span><strong>1557</strong></div>
                         <div class="staff-card"><span class="rank-mod">MODÉRATEUR</span><strong>Snayze</strong></div>
                     </div>
                 </div>
@@ -240,6 +365,18 @@
     </main>
 
     <script>
+        // --- LOGIQUE LIGHTBOX ---
+        function openImage(src) {
+            const lb = document.getElementById('lightbox');
+            const lbImg = document.getElementById('lightbox-img');
+            lbImg.src = src;
+            lb.classList.add('active');
+        }
+
+        function closeImage() {
+            document.getElementById('lightbox').classList.remove('active');
+        }
+
         // --- LOGIQUE NAVIGATION ---
         function toggleReglement() {
             const menu = document.getElementById('reglement-menu');
@@ -292,7 +429,7 @@
         }
 
         updateStatus();
-        setInterval(updateStatus, 10000);
+        setInterval(updateStatus, 60000);
     </script>
 
 </body>
